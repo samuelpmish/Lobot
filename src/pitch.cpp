@@ -20,7 +20,12 @@ Pitch::Pitch() {
     std::string line;
 
     while (std::getline(infile, line)) {       
-  std::stringstream ss(line); ss >> t.p[0][0]; ss >> t.p[0][1]; ss >> t.p[0][2];
+  
+      std::stringstream ss(line); 
+      
+      ss >> t.p[0][0]; 
+      ss >> t.p[0][1]; 
+      ss >> t.p[0][2];
   
       ss >> t.p[1][0];
       ss >> t.p[1][1];
