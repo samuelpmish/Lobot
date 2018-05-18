@@ -1,30 +1,19 @@
 #include "Car.h"
 
-#if 1
-
-//enum d_state {
-//  braking = 1,
-//  accelerating = 1 << 1,
-//  boosting = 1 << 2, 
-//  speed_slow = 1 << 3,
-//  speed_medium = 1 << 4,
-//  speed_high = 1 << 5
-//};
-
 float w_target(float vf) {
 
   vec < 6 > breaks{0.0f, 500.0f, 1000.0f, 1500.0f, 1750.0f, 2500.0f};
 
   if (breaks[0] <= vf && vf < breaks[1]) {
-		return  0.2719536733704970f + vf * (0.001658118981246462f - vf * 3.96113308697317e-7);
+		return  0.2719536733704970f + vf * (0.001658118981246462f - vf * 3.96113308697317e-7f);
   } else if (breaks[1] <= vf && vf < breaks[2]) {
-		return -1.5708421090289044f + vf * (0.004687995113863351f - vf * 1.52574186369491e-6);
+		return -1.5708421090289044f + vf * (0.004687995113863351f - vf * 1.52574186369491e-6f);
   } else if (breaks[2] <= vf && vf < breaks[3]) {
-		return -0.8142298712086391f + vf * (0.005629720388359599f - vf * 2.48983081905698e-6);
+		return -0.8142298712086391f + vf * (0.005629720388359599f - vf * 2.48983081905698e-6f);
   } else if (breaks[3] <= vf && vf < breaks[4]) {
-		return -0.0750149085518883f + vf * (0.005901886439895422f - vf * 3.50121183324955e-6);
+		return -0.0750149085518883f + vf * (0.005901886439895422f - vf * 3.50121183324955e-6f);
   } else if (breaks[4] <= vf && vf < breaks[5]) {
-		return  0.0361197319396348f + vf * (0.007166087839723428f - vf * 6.47415319487165e-6);
+		return  0.0361197319396348f + vf * (0.007166087839723428f - vf * 6.47415319487165e-6f);
   } else {
     return 0.0f;
   }
@@ -43,6 +32,7 @@ void Car::step(Input in, float dt) {
   constexpr float boost_force = 1500.0f;
   constexpr float steering_torque = 25.75f;
   constexpr float braking_threshold = -10.0f;
+  constexpr float supersonic_turn_drag = 1.0; // TODO
 
   // the net force and torque on the car for this step
   vec3 F{0.0f, 0.0f, 0.0f};
@@ -156,11 +146,10 @@ void Car::step(Input in, float dt) {
   // aerial
   } else {
 
-
+    // TODO
 
     dodge_timer += dt;
 
   }
 
 }
-#endif

@@ -2,6 +2,7 @@ CMakeCache.txt
 Makefile
 cmake_install.cmake
 CMakeFiles/*
+*~
 *.swo
 *.swp
 *.a

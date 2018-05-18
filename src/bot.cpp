@@ -35,7 +35,7 @@ private:
 
 };
 
-PYBIND11_MODULE(ibrahimobot, m) {
+PYBIND11_MODULE(Lobot, m) {
   pybind11::class_<Bot>(m, "Bot")
     .def(pybind11::init<int>())
     .def("get_response", &Bot::get_response);

@@ -55,10 +55,10 @@ class Ball {
         vec3 v_spin = R * cross(n, w_pred);
         vec3 s = v_para + v_spin;
     
-        double ratio = norm(v_perp) / norm(s);
+        float ratio = norm(v_perp) / norm(s);
     
-        vec3 delta_v_perp = - (1.0 + C_R) * v_perp;
-        vec3 delta_v_para = - fmin(1.0, Y * ratio) * mu * s;
+        vec3 delta_v_perp = - (1.0f + C_R) * v_perp;
+        vec3 delta_v_para = - fminf(1.0f, Y * ratio) * mu * s;
 
         w = w_pred + A * R * cross(delta_v_para, n);
         v = v_pred + delta_v_perp + delta_v_para;
