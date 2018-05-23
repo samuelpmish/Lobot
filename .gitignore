@@ -6,7 +6,6 @@ CMakeFiles/*
 *.swo
 *.swp
 *.a
-*.dat
 tests/CMakeCache.txt
 tests/bin
 tests/build
