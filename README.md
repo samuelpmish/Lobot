@@ -11,23 +11,34 @@ To build, you need a copy of 64 bit python, and a C++ compiler (assuming Windows
 
 Get a copy of the repo
 
-  git clone https://github.com/samuelpmish/Lobot
+```
+git clone https://github.com/samuelpmish/Lobot
+```
+
 
 Initialize the submodules
 
-  cd Lobot
-  git submodule init
-  git submodule update --remote
+```
+cd Lobot
+git submodule init
+git submodule update --remote
+```
 
 Generate the project files
 
-  cmake . -G"Visual Studio 15 2017 Win64"
+```
+cmake . -G"Visual Studio 15 2017 Win64"
+```
 
 Build
 
-  cmake --build . --config Release
+```
+cmake --build . --config Release
+```
 
 Testing (C++)
 
-  cd tests
-  ctest.exe
+```
+cd tests
+ctest.exe
+```
