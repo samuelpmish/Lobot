@@ -13,7 +13,8 @@ add_library(bot_utils STATIC
 target_include_directories(bot_utils PUBLIC inc/)
 target_compile_features(bot_utils PUBLIC cxx_std_11)
 
-pybind11_add_module(${PROJECT_NAME} src/bot.cpp)
+# pybind11_add_module(${PROJECT_NAME} src/bot.cpp)
+pybind11_add_module(${PROJECT_NAME} src/Ball.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE bot_utils)
 target_include_directories(${PROJECT_NAME} PRIVATE inc/)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
