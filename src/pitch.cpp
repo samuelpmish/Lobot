@@ -1,4 +1,5 @@
 #include "pitch.h"
+#include "resource.h"
 
 #include <sstream>
 #include <fstream>
@@ -6,7 +7,7 @@
 
 Pitch::Pitch() {
 
-  std::string filename("../doc/meshes/pitch.dat");
+  std::string filename(ASSET("meshes/pitch.dat"));
   std::ifstream infile(filename);
 
   if (!infile.good()) {
@@ -65,7 +66,7 @@ bool Pitch::in_contact_with(const obb & o) {
 
 ray Pitch::last_contact_info() {
 
-  int count = 0;
+  float count = 0;
   vec3 pos{0.0f, 0.0f, 0.0f};
   vec3 normal{0.0f, 0.0f, 0.0f};
 

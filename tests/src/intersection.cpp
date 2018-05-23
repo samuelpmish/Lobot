@@ -1,3 +1,4 @@
+#include "resource.h"
 #include "primitives.h"
 
 #include <vector>
@@ -5,7 +6,7 @@
 #include <fstream>
 #include <sstream>
 
-std::string prefix("../doc/intersections/");
+std::string prefix(ASSET("intersections/"));
 
 std::vector < aabb > read_aabbs(std::string filename) {
 

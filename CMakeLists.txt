@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.8)
 project(Lobot)
 
+add_definitions(-DASSET_PATH="${PROJECT_SOURCE_DIR}/assets/")
+
+add_subdirectory(tests)
 add_subdirectory(pybind11)
 
 add_library(bot_utils STATIC

@@ -2,6 +2,8 @@
 #include "timer.h"
 #include "DynamicState.h"
 
+#include "resource.h"
+
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -113,8 +115,8 @@ int main() {
   const float dt = 1.0 / 61.0;
   char buf[] = "000000.csv";
   int n_episodes = 344;
-  std::string in_prefix("../doc/ball_trajectories/episode_");
-  std::string out_prefix("../doc/ball_trajectories/prediction_");
+  std::string in_prefix(ASSET("/ball_trajectories/episode_"));
+  std::string out_prefix(ASSET("/ball_trajectories/prediction_"));
 
   Ball b;
   timer stopwatch;
