@@ -24,7 +24,7 @@ git submodule init
 git submodule update --remote
 ```
 
-Generate the project files
+Generate the project files (e.g. for Visual Studio 15)
 
 ```
 cmake . -G"Visual Studio 15 2017 Win64"
