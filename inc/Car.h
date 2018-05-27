@@ -11,10 +11,26 @@ class Car {
 
   public:
 
-    int boost;
+    struct state {
+  
+      vec3 x;
+      vec3 v;
+      vec3 w;
+      mat3 o;
+  
+      bool supersonic;
+      bool jumped;
+      bool double_jumped;
+      bool on_ground;
+      
+      int boost;
+  
+    };
+
+    state s;
+
+    bool can_dodge;
     float dodge_timer;
-    bool on_ground;
-    DynamicState current;
 
     Pitch env;
     Ball ball;
@@ -26,31 +42,23 @@ class Car {
 
     void step(Input in, float dt = DELTA_T);
 
-    //void integrate(Input in, float dt) {
+  private:
 
-    //  const double boost_acc = 1000.0;
+    void jump(const Input & in, float dt);
+    void air_dodge(const Input & in, float dt);
+    void aerial_control(const Input & in, float dt);
 
-    //  vec3 a = drag * current.v + vec3{0.0, 0.0, g}; 
+    float drive_force_left(const Input & in);
+    float drive_force_forward(const Input & in);
+    float drive_torque_up(const Input & in);
+    void driving(const Input & in, float dt);
 
-    //  if (in.boost && boost > 0) {
-    //    a += dot(current.o, vec3{1.0, 0.0, 0.0}) * boost_acc;
-    //  }
+    void driving_handbrake(const Input & in, float dt);
 
-    //  vec3 T{0.0, 0.0, 0.0};
+    vec3 forward();
+    vec3 left();
+    vec3 up();
 
-    //  if (onGround) {
-
-    //  } else {
-
-    //  }
-
-    //  DynamicState predicted{
-    //    current.x + current.v * dt,
-    //    current.v + a * dt,
-    //    current.w,
-    //    dot(rotation(current.w * dt), current.o)
-    //  };
-
-    //}
+    void check_collision();
 
 };

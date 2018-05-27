@@ -300,7 +300,7 @@ inline mat < m, p > dot(const mat < m, n > & A,
 
 }
 
-inline mat < 3, 3 > rotation(const vec < 3 > & omega) {
+inline mat < 3, 3 > aa_rotation(const vec < 3 > & omega) {
 
   vec3 axis = normalize(omega);
   float theta = norm(omega);
@@ -312,6 +312,36 @@ inline mat < 3, 3 > rotation(const vec < 3 > & omega) {
   };
 
   return eye< 3 >() + sin(theta) * K + (1.0f - cos(theta)) * dot(K, K);
+
+}
+
+inline mat < 3, 3 > ea_rotation(const vec < 3 > & pyr) {
+
+  float CP = cos(pyr[0]); 
+  float SP = sin(pyr[0]);
+  float CY = cos(pyr[1]);
+  float SY = sin(pyr[1]);
+  float CR = cos(pyr[2]);
+  float SR = sin(pyr[2]);
+
+  mat < 3, 3 > theta;
+
+  // front direction
+  theta(0, 0) = CP * CY;
+  theta(1, 0) = CP * SY;
+  theta(2, 0) = SP; 
+
+  // left direction
+  theta(0, 1) = CY * SP * SR - CR * SY;
+  theta(1, 1) = SY * SP * SR + CR * CY;
+  theta(2, 1) = -CP * SR; 
+
+  // up direction
+  theta(0, 2) = -CR * CY * SP - SR * SY; 
+  theta(1, 2) = -CR * SY * SP + SR * CY;
+  theta(2, 2) = CP * CR; 
+
+  return theta; 
 
 }
 

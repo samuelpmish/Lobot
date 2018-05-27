@@ -12,6 +12,8 @@ set(CPP_TESTS
   ${PROJECT_SOURCE_DIR}/src/queries.cpp
   ${PROJECT_SOURCE_DIR}/src/intersection.cpp
   ${PROJECT_SOURCE_DIR}/src/ball_bouncing.cpp
+  ${PROJECT_SOURCE_DIR}/src/aerial_controls.cpp
+  ${PROJECT_SOURCE_DIR}/src/driving_controls.cpp
 )
 
 foreach(filename ${CPP_TESTS})

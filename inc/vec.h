@@ -51,6 +51,17 @@ class vec {
       return v;
     }
 
+    // elementwise multiplication
+    vec < n > operator*(const vec < n > & other) const{
+      vec < n > v;
+      for(int i = 0; i < n; i++){
+        v[i] = data[i] * other[i];
+      }
+      return v;
+    }
+
+
+
     // in-place elementwise addition
     void operator+=(const vec < n > & other){
       for(int i = 0; i < n; i++){

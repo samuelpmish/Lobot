@@ -1,6 +1,6 @@
-#include "ball.h"
+#include "car.h"
 #include "timer.h"
-#include "DynamicState.h"
+#include "RL_structs.h"
 
 #include "resource.h"
 
@@ -10,7 +10,7 @@
 #include <algorithm>
 
 void write_to_file(std::string filename,
-    const std::vector < DynamicState > & states) {
+    const std::vector < Car::state > & states) {
 
   std::ofstream outfile(filename);
 
@@ -32,11 +32,11 @@ void write_to_file(std::string filename,
 
 }
 
-std::vector < DynamicState > read_from_file(std::string filename) {
+std::vector < std::pair < Car::state, Input > > read_from_file(std::string filename) {
 
-  float t;
-  DynamicState s;
-  std::vector < DynamicState > states;
+  Input in;
+  Car::state s;
+  std::vector < std::pair < Car::state, Input > > data;
 
   std::ifstream infile(filename);
 
@@ -53,9 +53,6 @@ std::vector < DynamicState > read_from_file(std::string filename) {
       std::replace(line.begin(), line.end(), ',', ' ');
       std::stringstream ss(line);
       
-      // discard time stamp
-      ss >> t;
-
       // position
       ss >> s.x[0];
       ss >> s.x[1];
@@ -67,16 +64,36 @@ std::vector < DynamicState > read_from_file(std::string filename) {
       ss >> s.v[2];
 
       // discard euler angle info
-      ss >> t; 
-      ss >> t;
-      ss >> t;
+      vec3 euler_angles;
+      ss >> euler_angles[0];
+      ss >> euler_angles[1];
+      ss >> euler_angles[2];
+      s.o = ea_rotation(euler_angles * 0.0000958738f);
   
       // angular velocity
       ss >> s.w[0];
       ss >> s.w[1];
       ss >> s.w[2];
+
+      // other car state variables
+      ss >> s.supersonic;
+      ss >> s.jumped;
+      ss >> s.double_jumped;
+      ss >> s.on_ground;
+      ss >> s.boost;
+      
+
+      // input variables
+      ss >> in.throttle;
+      ss >> in.steer;
+      ss >> in.pitch;
+      ss >> in.yaw;
+      ss >> in.roll;
+      ss >> in.jump;
+      ss >> in.boost;
+      ss >> in.slide;
   
-      states.push_back(s);
+      data.push_back(std::make_pair(s, in));
   
     }
   
@@ -84,24 +101,24 @@ std::vector < DynamicState > read_from_file(std::string filename) {
 
   }
 
-  return states;
+  return data;
 
 }
 
-vec3 compare(const std::vector < DynamicState > & obs,
-             const std::vector < DynamicState > & pred) {
+vec3 compare(const std::vector < std::pair < Car::state, Input > > & obs,
+             const std::vector < Car::state > & pred) {
 
   vec3 norms{0.0f, 0.0f, 0.0f};
   vec3 error{0.0f, 0.0f, 0.0f};
 
   for (int i = 0; i < obs.size(); i++) {
-    error[0] += norm(obs[i].x - pred[i].x);
-    error[1] += norm(obs[i].v - pred[i].v);
-    error[2] += norm(obs[i].w - pred[i].w);
+    error[0] += norm(obs[i].first.x - pred[i].x);
+    error[1] += norm(obs[i].first.v - pred[i].v);
+    error[2] += norm(obs[i].first.w - pred[i].w);
 
-    norms[0] += norm(obs[i].x);
-    norms[1] += norm(obs[i].v);
-    norms[2] += norm(obs[i].w);
+    norms[0] += norm(obs[i].first.x);
+    norms[1] += norm(obs[i].first.v);
+    norms[2] += norm(obs[i].first.w);
   }
 
   return vec3{error[0] / norms[0], 
@@ -112,54 +129,48 @@ vec3 compare(const std::vector < DynamicState > & obs,
 
 int main() {
 
-  const float dt = 1.0 / 61.0;
-  char buf[] = "000000.csv";
-  int n_episodes = 344;
-  std::string in_prefix(ASSET("/ball_trajectories/episode_"));
-  std::string out_prefix(ASSET("/ball_trajectories/prediction_"));
+  const float dt = 1.0f / 61.0f;
+  char buf[] = "00.csv";
+  int n_episodes = 15;
+  std::string in_prefix(ASSET("car_control/aerial/episode_"));
+  std::string out_prefix(ASSET("car_control/aerial/prediction_"));
 
-  Ball b;
+  Car c;
   timer stopwatch;
   double time = 0.0;
-  uint32_t count = 0;
+  size_t count = 0;
   vec3 total_error{0.0f, 0.0f, 0.0f};
 
   for (int i = 0; i < n_episodes; i++) {
 
-    sprintf(buf, "%06d.csv", i);
+    sprintf(buf, "%02d.csv", i);
     std::string suffix(buf);
 
     std::cout << in_prefix + suffix << std::endl;
 
-    auto observations = read_from_file(in_prefix + suffix);
+    auto data = read_from_file(in_prefix + suffix);
 
-    b.x = observations[0].x;
-    b.v = observations[0].v;
-    b.w = observations[0].w;
+    c.s = data[0].first;
 
-    std::vector < DynamicState > predictions; 
-    predictions.reserve(observations.size());
+    std::vector < Car::state > predictions; 
+    predictions.reserve(data.size());
     stopwatch.start();
-    predictions.push_back(DynamicState{b.x, b.v, b.w, eye<3>()});
-    while (predictions.size() < observations.size()) {
-      b.step(dt * 0.5f);
-      b.step(dt * 0.5f);
-      predictions.push_back(DynamicState{b.x, b.v, b.w, eye<3>()});
+    predictions.push_back(c.s);
+    for (int i = 0; i < data.size() - 1; i++) {
+      c.step(data[i].second, dt);
+      predictions.push_back(c.s);
     }
     stopwatch.stop();
 
     write_to_file(out_prefix + suffix, predictions);
 
-    vec3 error = compare(observations, predictions);
-    //std::cout << error << std::endl;
+    vec3 error = compare(data, predictions);
 
     time += stopwatch.elapsed();
-    count += 2 * observations.size();
+    count += data.size();
     total_error += error;
 
   }
-
-  std::cout << b.count << std::endl;
 
   std::cout << "evaluated " << count << " steps in " << time;
   std::cout << "s (" << time / double(count) << "s / step)" << std::endl;
