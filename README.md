@@ -7,7 +7,7 @@ python.
 
 ## Build and Test
 
-To build, you need a copy of 64 bit python, and a C++ compiler (assuming Windows only)
+To build, you need a copy of 64 bit python and a C++ compiler (assuming Windows only)
 
 Get a copy of the repo
 
