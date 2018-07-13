@@ -5,8 +5,13 @@ const float w_max = 5.5f;
 const float boost_accel = 1000.0f;
 const float dodge_limit = 0.5f; // TODO
 
+Pitch Car::env;
+
 float kappa(float v) {
 
+#if 1
+  return 0.0f;
+#else
   if (0.0f <= v && v < 500.0f) {
 		return  0.006900f - 5.84e-6 * v;
   } else if (500.0f <= v && v < 1000.0f) {
@@ -20,24 +25,25 @@ float kappa(float v) {
   } else {
 		return 0.0f;
   }
+#endif
 
 }
 
 vec3 Car::forward() {
 
-  return vec3{s.o(0, 0), s.o(1, 0), s.o(2, 0)};
+  return vec3{o(0, 0), o(1, 0), o(2, 0)};
 
 }
 
 vec3 Car::left() {
 
-  return vec3{s.o(0, 1), s.o(1, 1), s.o(2, 1)};
+  return vec3{o(0, 1), o(1, 1), o(2, 1)};
 
 }
 
 vec3 Car::up() {
 
-  return vec3{s.o(0, 2), s.o(1, 2), s.o(2, 2)};
+  return vec3{o(0, 2), o(1, 2), o(2, 2)};
 
 }
 
@@ -55,30 +61,46 @@ void Car::air_dodge(const Input & in, float dt) {
 
 void Car::aerial_control(const Input & in, float dt) {
 
+  const float M = 180.0f;                 // mass
+  const float J = 10.5f;                  // moment of inertia
+  const float v_max = 2300.0f;           
+  const float w_max = 5.5f;
+  const float boost_force = 178500.0f;
+  const float throttle_force = 12000.0f;
+  const vec3 g = {0.0f, 0.0f, -651.47f};
+
   const vec3 rpy{in.roll, in.pitch, in.yaw};
-  const vec3 T{-36.080f, -12.146f,  8.920f};
-  const vec3 D{
-    -4.472f,
-    -2.798f * (1.0f - fabs(in.pitch)), 
-    -1.886f * (1.0f - fabs(in.yaw))
-  };
 
-  s.v[2] += g * dt;
+  // air control torque coefficients
+  const vec3 T{-400.0f, -130.0f,  95.0f};
 
-  if (in.boost && s.boost > 0) {
-    s.v += forward() * boost_accel * dt;
-    s.boost--;
+  // air damping torque coefficients
+  const vec3 H{-50.0f, -30.0f * (1.0f - fabs(in.pitch)), -20.0f * (1.0f - fabs(in.yaw))};
+
+  float thrust = 0.0;
+
+  if (in.boost && boost > 0) {
+    thrust = (boost_force + throttle_force);
+    boost--;
+  } else {
+    thrust = in.throttle * throttle_force;
   }
 
-  s.x += s.v * dt;
+  v += (g + (thrust / M) * forward()) * dt;
+  x += v * dt;
 
-  vec3 w_local = dot(s.w, s.o); 
+  vec3 w_local = dot(w, o); 
 
-  vec3 old_w = s.w;
-  s.w += dot(s.o, T * rpy + D * w_local) * dt;
-  s.w *= fminf(1.0f, w_max / norm(s.w));
+  vec3 old_w = w;
+  w += dot(o, T * rpy + H * w_local) * (dt / J);
 
-  s.o = dot(aa_rotation(0.5f * (s.w + old_w)) * dt, s.o);
+  mat3 R = axis_rotation(0.5f * (w + old_w) * dt);
+
+  o = dot(axis_rotation(0.5f * (w + old_w) * dt), o);
+
+  // if the velocities exceed their maximum values, scale them back
+  v /= fmaxf(1.0f, norm(v) / v_max);
+  w /= fmaxf(1.0f, norm(w) / w_max);
 
 }
 
@@ -96,9 +118,9 @@ float Car::drive_force_forward(const Input & in) {
   constexpr float braking_threshold = -0.001f;
   constexpr float supersonic_turn_drag = -98.25; // TODO
 
-  const float v_f = dot(s.v, forward());
-  const float v_l = dot(s.v, left());
-  const float w_u = dot(s.w, up());
+  const float v_f = dot(v, forward());
+  const float v_l = dot(v, left());
+  const float w_u = dot(w, up());
 
   const float dir = sgn(v_f);
   const float speed = fabs(v_f);
@@ -178,9 +200,9 @@ float Car::drive_force_forward(const Input & in) {
 
 float Car::drive_force_left(const Input & in) {
 
-  const float v_f = dot(s.v, forward());
-  const float v_l = dot(s.v, left());
-  const float w_u = dot(s.w, up());
+  const float v_f = dot(v, forward());
+  const float v_l = dot(v, left());
+  const float w_u = dot(w, up());
 
   return (1380.4531378f * in.steer + 
              7.8281188f * in.throttle - 
@@ -191,8 +213,8 @@ float Car::drive_force_left(const Input & in) {
 
 float Car::drive_torque_up(const Input & in) {
 
-  float v_f = dot(s.v, forward());
-  float w_u = dot(s.w, up());
+  float v_f = dot(v, forward());
+  float w_u = dot(w, up());
 
   return 15.0f * (in.steer * kappa(fabs(v_f)) * v_f - w_u);
 
@@ -207,11 +229,11 @@ void Car::driving(const Input & in, float dt) {
   // out-of-plane torque
   vec3 torque = drive_torque_up(in) * up();
 
-  s.v += force * dt;
-  s.x += s.v * dt;
+  v += force * dt;
+  x += v * dt;
 
-  s.w += torque * dt;
-  s.o = dot(aa_rotation(s.w * dt), s.o);
+  w += torque * dt;
+  o = dot(axis_rotation(w * dt), o);
 
 }
 
@@ -224,7 +246,7 @@ void Car::driving_handbrake(const Input & in, float dt) {
 void Car::step(Input in, float dt) {
 
   // driving
-  if (s.on_ground) {
+  if (on_ground) {
 
     if (in.jump == 1) {
 
@@ -266,49 +288,57 @@ void Car::step(Input in, float dt) {
 
 }
 
+vec3 Car::pitch_surface_normal() {
+
+  sphere_collider.center = x;
+  if (env.in_contact_with(sphere_collider)) {
+    return env.last_contact_info().direction;
+  } else {
+    return vec3{0.0f, 0.0f, 0.0f};
+  }
+
+}
+
+obb Car::bounding_box(){
+
+  obb box;
+  box.orientation = o;
+  box.half_width = obb_collider.half_width;
+  box.center = dot(o, pivot_offset) + x;
+  return box;
+
+}
+
+void Car::extrapolate(float dt){
+  step(last, dt);
+}
+
 Car::Car() {
 
-  s.x = vec3{0.0f, 0.0f, 0.0f};
-  s.v = vec3{0.0f, 0.0f, 0.0f};
-  s.w = vec3{0.0f, 0.0f, 0.0f};
-  s.o = eye<3>();
+  x = vec3{0.0f, 0.0f, 0.0f};
+  v = vec3{0.0f, 0.0f, 0.0f};
+  w = vec3{0.0f, 0.0f, 0.0f};
+  o = eye<3>();
 
-  s.supersonic = false;
-  s.jumped = false;
-  s.double_jumped = false;
-  s.on_ground = false;
+  supersonic = false;
+  jumped = false;
+  double_jumped = false;
+  on_ground = false;
 
   can_dodge = false;
   dodge_timer = 0.0f;
 
-  collider.half_width = vec3{59.00368881f, 42.09970474f, 18.07953644f};
+  obb_collider.half_width = vec3{59.00368881f, 42.09970474f, 18.07953644f};
   pivot_offset = vec3{13.97565993f, 0.0f, 20.75498772f};
 
-//  // episode 0
-//  // car[[180]]
-//  s.x = vec3{2558.53f, -624.871f, 17.01f};
-//  s.v = vec3{-367.297f, 586.398f, 8.34f};
-//  s.w = vec3{-0.004465f, -0.001741f, 1.95546f};
-//  s.o = mat3{{-0.528724f, -0.84878f, -0.00486645f}, {0.848744f, -0.528746f,   0.00781196f}, {-0.00920375f, 0.0f, 0.999958f}};
-//  s.supersonic = false;
-//  s.jumped = false;
-//  s.double_jumped = false;
-//  s.on_ground = true;
-//
-//  Input in;
-//  in.throttle = 0.0f;
-//  in.steer = 0.889709f;
-//  in.pitch = 0.0f;
-//  in.yaw = 0.889709f;
-//  in.roll = 0.0f;
-//  in.jump = false;
-//  in.boost = false;
-//  in.slide = false;
-//
-//  step(in, 0.0163666f); 
-//
-//  std::cout << s.x << std::endl;
-//  std::cout << s.v << std::endl;
-//  std::cout << s.w << std::endl;
+  // just approximate geometry here
+  sphere_collider.radius = 40.0;
+
+  last = Input();
+
+  ETA = 0.0f;
+  time = 0.0f;
+
+  target = vec3{0.0f, 0.0f, 0.0f};
 
 }

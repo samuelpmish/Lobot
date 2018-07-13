@@ -4,49 +4,16 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
+
+extern uint32_t mesh_data[72252];
 
 Pitch::Pitch() {
 
-  std::string filename(ASSET("meshes/pitch.dat"));
-  std::ifstream infile(filename);
+  tri * tri_ptr = (tri*)mesh_data;
+  triangles = std::vector < tri >(tri_ptr, tri_ptr + 8028);
 
-  if (!infile.good()) {
-
-    std::cout << "file not found" << std::endl;
-    exit(1);
-
-  } else {
-
-    tri t;
-    std::string line;
-
-    while (std::getline(infile, line)) {       
-  
-      std::stringstream ss(line); 
-      
-      ss >> t.p[0][0]; 
-      ss >> t.p[0][1]; 
-      ss >> t.p[0][2];
-  
-      ss >> t.p[1][0];
-      ss >> t.p[1][1];
-      ss >> t.p[1][2];
-  
-      ss >> t.p[2][0];
-      ss >> t.p[2][1];
-      ss >> t.p[2][2];
-  
-      triangles.push_back(t);
-  
-    }
-  
-    infile.close(); 
-
-    std::cout << "successfully read " << triangles.size() << " triangles" << std::endl;
-
-    mesh = bvh < tri >(triangles); 
-
-  }
+  mesh = bvh < tri >(triangles); 
 
 }
 
@@ -78,4 +45,8 @@ ray Pitch::last_contact_info() {
 
   return ray{pos / count, normalize(normal)};
 
+}
+
+vec3 closest_point_on_side(const vec3 & v) {
+  return vec3{v[0], v[1], 4096.0f * sgn(v[2])};
 }

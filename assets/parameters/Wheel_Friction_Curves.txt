@@ -1,0 +1,75 @@
+# wheel friction curves
+# same values for all 4 wheels
+
+
+LatFrictionCurve:
+
+InVal : 0.000000
+OutVal : 1.000000
+ArriveTangent : 1.000000
+LeaveTangent : 1.000000
+InterpMode : 0
+
+InVal : 1.000000
+OutVal : 0.200000
+ArriveTangent : 0.200000
+LeaveTangent : 0.200000
+InterpMode : 0
+
+InterpMethod : 0
+
+
+LongFrictionCurve:
+
+InterpMethod : 0
+
+
+HandbrakeLatFrictionCurve:
+
+InVal : 0.000000
+OutVal : 0.100000
+ArriveTangent : 0.100000
+LeaveTangent : 0.100000
+InterpMode : 0
+
+InterpMethod : 0
+
+
+HandbrakeLongFrictionCurve:
+
+InVal : 0.000000
+OutVal : 0.500000
+ArriveTangent : 0.500000
+LeaveTangent : 0.500000
+InterpMode : 0
+
+InVal : 1.000000
+OutVal : 0.900000
+ArriveTangent : 0.900000
+LeaveTangent : 0.900000
+InterpMode : 0
+
+InterpMethod : 0
+
+
+WallFrictionCurve:
+
+InVal : 0.000000
+OutVal : 0.100000
+ArriveTangent : 0.100000
+LeaveTangent : 0.100000
+InterpMode : 0
+
+InVal : 0.707000
+OutVal : 0.500000
+ArriveTangent : 0.500000
+LeaveTangent : 0.500000
+InterpMode : 0
+
+InVal : 1.000000
+OutVal : 1.000000
+ArriveTangent : 1.000000
+LeaveTangent : 1.000000
+InterpMode : 0
+
+InterpMethod : 0

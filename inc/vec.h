@@ -26,6 +26,12 @@ class vec {
       }
     }
 
+    vec(const vec < n > & other) {
+      for (int i = 0; i < n; i++) {
+        data[i] = other[i];
+      }
+    }
+
     float & operator[](const int i){
       return data[i];
     }
@@ -60,13 +66,12 @@ class vec {
       return v;
     }
 
-
-
     // in-place elementwise addition
-    void operator+=(const vec < n > & other){
+    vec < n > & operator+=(const vec < n > & other){
       for(int i = 0; i < n; i++){
         data[i] += other[i];
       }
+      return *this;
     }
 
     // unary minus
@@ -88,31 +93,35 @@ class vec {
     }
 
     // in-place elementwise subtraction
-    void operator-=(const vec < n > & other){
+    vec < n > & operator-=(const vec < n > & other){
       for(int i = 0; i < n; i++){
         data[i] -= other[i];
       }
+      return *this;
     }
 
     // in-place scalar addition
-    void operator+=(const float other){
+    vec< n > & operator+=(const float other){
       for(int i = 0; i < n; i++){
         data[i] += other;
       }
+      return *this;
     }
 
     // in-place scalar multiplication
-    void operator*=(const float other){
+    vec < n > & operator*=(const float other){
       for(int i = 0; i < n; i++){
         data[i] *= other;
       }
+      return *this;
     }
 
     // in-place scalar division
-    void operator/=(const float other){
+    vec < n > & operator/=(const float other){
       for(int i = 0; i < n; i++){
         data[i] /= other;
       }
+      return *this;
     }
 
 };

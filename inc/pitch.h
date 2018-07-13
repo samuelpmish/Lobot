@@ -19,4 +19,6 @@ class Pitch {
     bool in_contact_with(const sphere & s); 
     ray last_contact_info();
 
+    vec3 closest_point_on_side(const vec3 & v);
+
 };

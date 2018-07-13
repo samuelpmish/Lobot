@@ -10,6 +10,7 @@ add_library(bot_utils STATIC
   ${PROJECT_SOURCE_DIR}/src/car.cpp
   ${PROJECT_SOURCE_DIR}/src/bvh.cpp
   ${PROJECT_SOURCE_DIR}/src/pitch.cpp
+  ${PROJECT_SOURCE_DIR}/src/mesh.cpp
   ${PROJECT_SOURCE_DIR}/src/primitives.cpp
 )
 

@@ -6,6 +6,8 @@ CMakeFiles/*
 *.swo
 *.swp
 *.a
+*.vcxproj
+*.filters
 tests/CMakeCache.txt
 tests/bin
 tests/build

@@ -11,38 +11,46 @@ class Car {
 
   public:
 
-    struct state {
+    vec3 x;
+    vec3 v;
+    vec3 w;
+    mat3 o;
   
-      vec3 x;
-      vec3 v;
-      vec3 w;
-      mat3 o;
-  
-      bool supersonic;
-      bool jumped;
-      bool double_jumped;
-      bool on_ground;
-      
-      int boost;
-  
-    };
-
-    state s;
+    bool supersonic;
+    bool jumped;
+    bool double_jumped;
+    bool on_ground;
+    
+    int boost;
 
     bool can_dodge;
     float dodge_timer;
 
-    Pitch env;
-    Ball ball;
-
-    obb collider;
+    sphere sphere_collider;
+    obb obb_collider;
     vec3 pivot_offset;
+
+    float time;
+    float ETA; 
+
+    vec3 target;
+
+    Input last;
 
     Car();
 
-    void step(Input in, float dt = DELTA_T);
+    void step(Input in = Input(), float dt = DELTA_T);
+    vec3 pitch_surface_normal();
+    obb bounding_box();
+    void extrapolate(float);
+
+    vec3 forward();
+    vec3 left();
+    vec3 up();
 
   private:
+
+    static Pitch env;
 
     void jump(const Input & in, float dt);
     void air_dodge(const Input & in, float dt);
@@ -54,10 +62,6 @@ class Car {
     void driving(const Input & in, float dt);
 
     void driving_handbrake(const Input & in, float dt);
-
-    vec3 forward();
-    vec3 left();
-    vec3 up();
 
     void check_collision();
 

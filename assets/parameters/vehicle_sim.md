@@ -180,3 +180,53 @@ true ?
 ```
 1
 ```
+
+
+
+simulated function ApplyBallImpactForces(@NULL Ball, @NULL HitLocation)
+{
+    local @NULL RelVel, HitDir, HitDirXY, Impulse;
+    local NamedEvent ForwardDir;
+    local @NULL ForwardAdjustment, NonHitDirVelocity;
+    local float RelSpeed;
+
+    // End:0x517
+    if(BallInteraction.PushFactorCurve.Points.Length > 0)
+    {
+        RelVel = OldRBState.LinearVelocity - Ball.OldRBState.LinearVelocity;
+        RelSpeed = VSize(RelVel);
+        // End:0x517
+        if(RelSpeed > 0.0)
+        {
+            RelSpeed = FMin(RelSpeed, BallInteraction.MaxRelativeSpeed);
+            HitDir = Normal(Ball.OldRBState.Location - OldRBState.Location);
+            HitDir.Z *= (BallInteraction.PushZScale * (float(1) + (Ball.GetAdditionalCarBounceScaleZ(self) * 0.50)));
+            HitDir = Normal(HitDir);
+            // End:0x28E
+            if(BallInteraction.PushForwardScale != 1.0)
+            {
+                ForwardDir = GetRotatorAxis(OldRBState.Rotation, 0);
+                ForwardAdjustment = (ForwardDir * (HitDir Dot ForwardDir)) * (1.0 - BallInteraction.PushForwardScale);
+                HitDir -= ForwardAdjustment;
+                HitDir = Normal(HitDir);
+            }
+            HitDirXY = HitDir;
+            HitDirXY.Z = 0.0;
+            Impulse = (((HitDir * RelSpeed) * EvalInterpCurveFloat(BallInteraction.PushFactorCurve, RelSpeed)) * (float(1) + Ball.ReplicatedAddedCarBounceScale)) + (HitDirXY * Ball.AdditionalCarGroundBounceScaleXY);
+            Impulse += (Impulse * AddedBallForceMultiplier);
+            Ball.CollisionComponent.AddImpulse(Impulse,,, true);
+            // End:0x4CB
+            if(BallInteraction.DampingAmount > 0.0)
+            {
+                NonHitDirVelocity = Ball.OldRBState.LinearVelocity - (HitDir * (Ball.OldRBState.LinearVelocity Dot HitDir));
+                Ball.CollisionComponent.AddImpulse(-NonHitDirVelocity * BallInteraction.DampingAmount,,, true);
+            }
+            // End:0x517
+            if((Role == ROLE_Authority) && Ball.ShouldDemolish(self))
+            {
+                Demolish(Ball);
+            }
+        }
+    }
+    //return;    
+}

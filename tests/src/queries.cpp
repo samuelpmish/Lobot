@@ -19,6 +19,8 @@ int main() {
   std::default_random_engine gen;
   std::uniform_real_distribution< float > distr(-6000.0f, 6000.0f);
   
+  std::cout << "Starting tests" << std::endl;
+
   size_t nqueries = 1000;
   for (int i = 0; i < nqueries; i++) {
 

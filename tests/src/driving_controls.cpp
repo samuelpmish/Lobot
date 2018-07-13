@@ -10,7 +10,7 @@
 #include <algorithm>
 
 void write_to_file(std::string filename,
-    const std::vector < Car::state > & states) {
+    const std::vector < Car > & states) {
 
   std::ofstream outfile(filename);
 
@@ -32,11 +32,11 @@ void write_to_file(std::string filename,
 
 }
 
-std::vector < std::pair < Car::state, Input > > read_from_file(std::string filename) {
+std::vector < std::pair < Car, Input > > read_from_file(std::string filename) {
 
   Input in;
-  Car::state s;
-  std::vector < std::pair < Car::state, Input > > data;
+  Car c;
+  std::vector < std::pair < Car, Input > > data;
 
   std::ifstream infile(filename);
 
@@ -54,33 +54,33 @@ std::vector < std::pair < Car::state, Input > > read_from_file(std::string filen
       std::stringstream ss(line);
       
       // position
-      ss >> s.x[0];
-      ss >> s.x[1];
-      ss >> s.x[2];
+      ss >> c.x[0];
+      ss >> c.x[1];
+      ss >> c.x[2];
   
       // velocity
-      ss >> s.v[0];
-      ss >> s.v[1];
-      ss >> s.v[2];
+      ss >> c.v[0];
+      ss >> c.v[1];
+      ss >> c.v[2];
 
       // discard euler angle info
       vec3 euler_angles;
       ss >> euler_angles[0];
       ss >> euler_angles[1];
       ss >> euler_angles[2];
-      s.o = ea_rotation(euler_angles * 0.0000958738f);
+      c.o = euler_rotation(euler_angles * 0.0000958738f);
   
       // angular velocity
-      ss >> s.w[0];
-      ss >> s.w[1];
-      ss >> s.w[2];
+      ss >> c.w[0];
+      ss >> c.w[1];
+      ss >> c.w[2];
 
       // other car state variables
-      ss >> s.supersonic;
-      ss >> s.jumped;
-      ss >> s.double_jumped;
-      ss >> s.on_ground;
-      ss >> s.boost;
+      ss >> c.supersonic;
+      ss >> c.jumped;
+      ss >> c.double_jumped;
+      ss >> c.on_ground;
+      ss >> c.boost;
       
 
       // input variables
@@ -93,7 +93,7 @@ std::vector < std::pair < Car::state, Input > > read_from_file(std::string filen
       ss >> in.boost;
       ss >> in.slide;
   
-      data.push_back(std::make_pair(s, in));
+      data.push_back(std::make_pair(c, in));
   
     }
   
@@ -105,8 +105,8 @@ std::vector < std::pair < Car::state, Input > > read_from_file(std::string filen
 
 }
 
-vec3 compare(const std::vector < std::pair < Car::state, Input > > & obs,
-             const std::vector < Car::state > & pred) {
+vec3 compare(const std::vector < std::pair < Car, Input > > & obs,
+             const std::vector < Car > & pred) {
 
   vec3 norms{0.0f, 0.0f, 0.0f};
   vec3 error{0.0f, 0.0f, 0.0f};
@@ -150,15 +150,15 @@ int main() {
 
     auto data = read_from_file(in_prefix + suffix);
 
-    c.s = data[0].first;
+    c = data[0].first;
 
-    std::vector < Car::state > predictions; 
+    std::vector < Car > predictions; 
     predictions.reserve(data.size());
     stopwatch.start();
-    predictions.push_back(c.s);
+    predictions.push_back(c);
     for (int i = 0; i < data.size() - 1; i++) {
       c.step(data[i].second, dt);
-      predictions.push_back(c.s);
+      predictions.push_back(c);
     }
     stopwatch.stop();
 
