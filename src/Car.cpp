@@ -310,7 +310,8 @@ obb Car::bounding_box(){
 }
 
 void Car::extrapolate(float dt){
-  step(last, dt);
+  x += v * dt;
+  o = dot(axis_rotation(w * dt), o);
 }
 
 Car::Car() {
